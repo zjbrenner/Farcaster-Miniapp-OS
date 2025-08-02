@@ -57,3 +57,4 @@ export default function Frame({ symbol, name, image, link }) {
     </html>
   );
 }
+
