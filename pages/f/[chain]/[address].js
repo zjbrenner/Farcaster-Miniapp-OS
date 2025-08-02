@@ -21,7 +21,7 @@ export async function getServerSideProps(context) {
       if (token) {
         symbol = token.symbol;
         name = token.name;
-        image = token.image_url;
+        image = token.image_url || image; // Fallback to default OpenSea logo when token image missing
       }
     } catch (e) {
       console.error("Helius error", e);
@@ -33,7 +33,7 @@ export async function getServerSideProps(context) {
         const token = await cg.json();
         symbol = token.symbol.toUpperCase();
         name = token.name;
-        image = token.image.large;
+        image = token.image?.large || image; // Fallback to default OpenSea logo when token image missing
       }
     } catch (e) {
       console.error("CoinGecko error", e);
