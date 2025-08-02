@@ -24,8 +24,8 @@ const HomePage = () => {
 
       const fetchTokenInfo = async () => {
         if (chain === "solana") {
-          const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=helius-default`;
-          const response = await fetch(`https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=helius-default`);
+         const heliusUrl = `https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`;
+          const response = await fetch(`https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`);
           if (!response.ok) throw new Error("Helius API error");
           const data = await response.json();
           const token = data?.[0]?.token_info;
