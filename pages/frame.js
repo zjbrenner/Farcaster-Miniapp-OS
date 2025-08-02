@@ -41,6 +41,7 @@ export default function Frame({ symbol, name, image, link }) {
   return (
     <html>
       <head>
+        <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>{symbol} Token</title>
         <meta name="fc:frame" content="vNext" />
         <meta name="fc:frame:image" content={image} />
@@ -58,3 +59,8 @@ export default function Frame({ symbol, name, image, link }) {
   );
 }
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
