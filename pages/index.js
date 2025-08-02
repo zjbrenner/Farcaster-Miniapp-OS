@@ -1,3 +1,4 @@
+// pages/index.js
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -24,18 +25,28 @@ const HomePage = () => {
 
       const fetchTokenInfo = async () => {
         if (chain === "solana") {
-         const heliusUrl = `https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`;
-          const response = await fetch(`https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`);
+          const heliusUrl = `https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`;
+          const response = await fetch(heliusUrl);
           if (!response.ok) throw new Error("Helius API error");
           const data = await response.json();
           const token = data?.[0]?.token_info;
-          if (!token) throw new Error("No token info found");
-          setTokenInfo({
-            name: token.name,
-            symbol: token.symbol,
-            image: token.image_url,
-            refLink
-          });
+
+          if (token) {
+            setTokenInfo({
+              name: token.name,
+              symbol: token.symbol,
+              image: token.image_url,
+              refLink,
+            });
+          } else {
+            // Fallback if token not found in Helius
+            setTokenInfo({
+              name: "Unknown Solana Token",
+              symbol: address.slice(0, 4) + "..." + address.slice(-4),
+              image: "https://cryptologos.cc/logos/solana-sol-logo.png?v=026",
+              refLink,
+            });
+          }
         } else {
           const supportedChains = ["ethereum", "polygon", "base"];
           const cgPlatform = supportedChains.includes(chain) ? chain : null;
@@ -50,7 +61,7 @@ const HomePage = () => {
             name,
             symbol: symbol.toUpperCase(),
             image: image.large,
-            refLink
+            refLink,
           });
         }
       };
