@@ -1,0 +1,79 @@
+export async function getServerSideProps(context) {
+  const { chain, address } = context.query;
+  const supportedChains = ["ethereum", "polygon", "base"];
+
+  if (!chain || !address) {
+    return {
+      props: {
+        error: "Missing chain or address",
+      },
+    };
+  }
+
+  let symbol = address.slice(0, 4) + "..." + address.slice(-4);
+  let name = "Unknown Token";
+  let image = "https://opensea.io/static/images/logos/opensea.svg";
+  let link = `https://opensea.io/token/${chain}/${address}?os_ref=farcaster`;
+
+  if (chain === "solana") {
+    try {
+      const helius = await fetch(`https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`);
+      const result = await helius.json();
+      const token = result?.[0]?.token_info;
+      if (token) {
+        symbol = token.symbol;
+        name = token.name;
+        image = token.image_url;
+      }
+    } catch (e) {
+      console.error("Helius error", e);
+    }
+  } else if (supportedChains.includes(chain)) {
+    try {
+      const cg = await fetch(`https://api.coingecko.com/api/v3/coins/${chain}/contract/${address}`);
+      if (cg.ok) {
+        const token = await cg.json();
+        symbol = token.symbol.toUpperCase();
+        name = token.name;
+        image = token.image.large;
+      }
+    } catch (e) {
+      console.error("CoinGecko error", e);
+    }
+  }
+
+  return {
+    props: {
+      symbol,
+      name,
+      image,
+      link,
+    },
+  };
+}
+
+export default function Frame({ symbol, name, image, link, error }) {
+  if (error) {
+    return (
+      <>
+        <title>Missing Frame Data</title>
+        <meta name="fc:frame" content="vNext" />
+        <meta name="fc:frame:button:1" content="Invalid" />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <title>{symbol} Token Frame</title>
+      <meta name="fc:frame" content="vNext" />
+      <meta name="fc:frame:image" content={image} />
+      <meta name="fc:frame:button:1" content="View on OpenSea" />
+      <meta name="fc:frame:button:1:action" content="link" />
+      <meta name="fc:frame:button:1:target" content={link} />
+      <meta property="og:title" content={name} />
+      <meta property="og:image" content={image} />
+      <meta property="og:description" content={`Preview of ${symbol}`} />
+    </>
+  );
+}
