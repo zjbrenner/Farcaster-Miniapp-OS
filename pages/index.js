@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Head from "next/head";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 
@@ -39,7 +40,6 @@ const HomePage = () => {
                 refLink,
               });
             } else {
-              // fallback when no token info returned
               setTokenInfo({
                 name: "Unknown Solana Token",
                 symbol: address.slice(0, 4) + "..." + address.slice(-4),
@@ -96,28 +96,41 @@ const HomePage = () => {
   const { name, symbol, image, refLink } = tokenInfo;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardContent className="space-y-4 p-6">
-          <h1 className="text-xl font-bold text-center">{symbol || "Token"}</h1>
-          {name && <p className="text-center text-gray-600">{name}</p>}
-          {image && (
-            <img
-              src={image}
-              alt={symbol || "Token Logo"}
-              className="w-24 h-24 mx-auto rounded-full border"
-            />
-          )}
-          <div className="flex justify-center">
-            <Button asChild>
-              <a href={refLink} target="_blank" rel="noopener noreferrer">
-                View on OpenSea ↗
-              </a>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <Head>
+        <title>{symbol} – Token Preview</title>
+        <meta property="og:title" content={`OpenSea Token: ${symbol}`} />
+        <meta property="og:description" content={`View ${name} on OpenSea`} />
+        <meta property="og:image" content={image} />
+        <meta name="fc:frame" content="vNext" />
+        <meta name="fc:frame:image" content={image} />
+        <meta name="fc:frame:button:1" content="View on OpenSea" />
+        <meta name="fc:frame:button:1:action" content="link" />
+        <meta name="fc:frame:button:1:target" content={refLink} />
+      </Head>
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+        <Card className="w-full max-w-md shadow-xl">
+          <CardContent className="space-y-4 p-6">
+            <h1 className="text-xl font-bold text-center">{symbol || "Token"}</h1>
+            {name && <p className="text-center text-gray-600">{name}</p>}
+            {image && (
+              <img
+                src={image}
+                alt={symbol || "Token Logo"}
+                className="w-24 h-24 mx-auto rounded-full border"
+              />
+            )}
+            <div className="flex justify-center">
+              <Button asChild>
+                <a href={refLink} target="_blank" rel="noopener noreferrer">
+                  View on OpenSea ↗
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
 
