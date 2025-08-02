@@ -1,5 +1,5 @@
 export async function getServerSideProps(context) {
-  const { chain, address } = context.query;
+  const { chain, address } = context.params;
   const supportedChains = ["ethereum", "polygon", "base"];
 
   if (!chain || !address) {
@@ -15,7 +15,7 @@ export async function getServerSideProps(context) {
 
   if (chain === "solana") {
     try {
-      const helius = await fetch(`https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`);
+      const helius = await fetch(`https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=YOUR_REAL_API_KEY_HERE`);
       const result = await helius.json();
       const token = result?.[0]?.token_info;
       if (token) {
@@ -51,11 +51,11 @@ export async function getServerSideProps(context) {
         <meta name="fc:frame:button:1:target" content="${link}" />
         <meta property="og:title" content="${name}" />
         <meta property="og:image" content="${image}" />
-        <meta property="og:description" content="Preview of ${symbol}" />
+        <meta property="og:description" content="Preview of ${symbol} — powered by OpenSea" />
         <title>${symbol} Token Frame</title>
       </head>
       <body>
-        Token Frame Meta Loaded.
+        Token Frame Meta Loaded — Day 1 of Zack's coding journey 🚀
       </body>
     </html>
   `;
