@@ -3,11 +3,9 @@ export async function getServerSideProps(context) {
   const supportedChains = ["ethereum", "polygon", "base"];
 
   if (!chain || !address) {
-    return {
-      props: {
-        error: "Missing chain or address",
-      },
-    };
+    context.res.setHeader("Content-Type", "text/html");
+    context.res.end("<html><head><title>Error</title><meta name='fc:frame' content='vNext' /><meta name='fc:frame:button:1' content='Invalid' /></head><body>Error: Missing chain or address</body></html>");
+    return { props: {} };
   }
 
   let symbol = address.slice(0, 4) + "..." + address.slice(-4);
@@ -42,39 +40,33 @@ export async function getServerSideProps(context) {
     }
   }
 
-  return {
-    props: {
-      symbol,
-      name,
-      image,
-      link,
-    },
-  };
-}
-
-export default function Frame({ symbol, name, image, link, error }) {
-  if (error) {
-    return (
-      <>
-        <title>Missing Frame Data</title>
+  const html = `
+    <html>
+      <head>
+        <meta charset='utf-8' />
         <meta name="fc:frame" content="vNext" />
-        <meta name="fc:frame:button:1" content="Invalid" />
-      </>
-    );
-  }
+        <meta name="fc:frame:image" content="${image}" />
+        <meta name="fc:frame:button:1" content="View on OpenSea" />
+        <meta name="fc:frame:button:1:action" content="link" />
+        <meta name="fc:frame:button:1:target" content="${link}" />
+        <meta property="og:title" content="${name}" />
+        <meta property="og:image" content="${image}" />
+        <meta property="og:description" content="Preview of ${symbol}" />
+        <title>${symbol} Token Frame</title>
+      </head>
+      <body>
+        Token Frame Meta Loaded.
+      </body>
+    </html>
+  `;
 
-  return (
-    <>
-      <title>{symbol} Token Frame</title>
-      <meta name="fc:frame" content="vNext" />
-      <meta name="fc:frame:image" content={image} />
-      <meta name="fc:frame:button:1" content="View on OpenSea" />
-      <meta name="fc:frame:button:1:action" content="link" />
-      <meta name="fc:frame:button:1:target" content={link} />
-      <meta property="og:title" content={name} />
-      <meta property="og:image" content={image} />
-      <meta property="og:description" content={`Preview of ${symbol}`} />
-    </>
-  );
+  context.res.setHeader("Content-Type", "text/html");
+  context.res.end(html);
+  return { props: {} };
 }
+
+export default function Frame() {
+  return null;
+}
+
 
