@@ -24,26 +24,40 @@ const HomePage = () => {
 
       const fetchTokenInfo = async () => {
         if (chain === "solana") {
-          const heliusUrl = `https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=helius-default`; // Replace with your key for production
-          const response = await fetch(heliusUrl);
-          if (!response.ok) throw new Error("Failed to fetch from Helius");
+          const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=helius-default`;
+          const response = await fetch(`https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=helius-default`);
+          if (!response.ok) throw new Error("Helius API error");
           const data = await response.json();
-          const { name, symbol, image } = data?.[0] || {};
-          setTokenInfo({ name, symbol, image, refLink });
+          const token = data?.[0]?.token_info;
+          if (!token) throw new Error("No token info found");
+          setTokenInfo({
+            name: token.name,
+            symbol: token.symbol,
+            image: token.image_url,
+            refLink
+          });
         } else {
-          const platform = chain === "ethereum" ? "ethereum" : chain;
-          const cgUrl = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${address}`;
+          const supportedChains = ["ethereum", "polygon", "base"];
+          const cgPlatform = supportedChains.includes(chain) ? chain : null;
+          if (!cgPlatform) throw new Error("Unsupported chain for token preview");
+
+          const cgUrl = `https://api.coingecko.com/api/v3/coins/${cgPlatform}/contract/${address}`;
           const response = await fetch(cgUrl);
-          if (!response.ok) throw new Error("Failed to fetch from CoinGecko");
+          if (!response.ok) throw new Error("Token not found on CoinGecko");
           const data = await response.json();
           const { name, symbol, image } = data;
-          setTokenInfo({ name, symbol: symbol.toUpperCase(), image: image.large, refLink });
+          setTokenInfo({
+            name,
+            symbol: symbol.toUpperCase(),
+            image: image.large,
+            refLink
+          });
         }
       };
 
       fetchTokenInfo().catch((err) => {
         console.error(err);
-        setError("Unable to load token data.");
+        setError("Unable to load token data. This token may not be supported.");
       });
     } catch (err) {
       console.error(err);
