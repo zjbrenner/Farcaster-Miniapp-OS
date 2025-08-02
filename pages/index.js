@@ -1,4 +1,3 @@
-// pages/index.js
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -26,36 +25,37 @@ const HomePage = () => {
       const fetchTokenInfo = async () => {
         if (chain === "solana") {
           const heliusUrl = `https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`;
-try {
-  const response = await fetch(heliusUrl);
-  const data = response.ok ? await response.json() : [];
+          try {
+            const response = await fetch(heliusUrl);
+            const data = response.ok ? await response.json() : [];
 
-  const token = data?.[0]?.token_info;
+            const token = data?.[0]?.token_info;
 
-  if (token) {
-    setTokenInfo({
-      name: token.name,
-      symbol: token.symbol,
-      image: token.image_url,
-      refLink,
-    });
-  } else {
-    setTokenInfo({
-      name: "Unknown Solana Token",
-      symbol: address.slice(0, 4) + "..." + address.slice(-4),
-      image: "https://cryptologos.cc/logos/solana-sol-logo.png?v=026",
-      refLink,
-    });
-  }
-} catch (err) {
-  console.error("Helius fallback catch", err);
-  setTokenInfo({
-    name: "Unknown Solana Token",
-    symbol: address.slice(0, 4) + "..." + address.slice(-4),
-    image: "https://cryptologos.cc/logos/solana-sol-logo.png?v=026",
-    refLink,
-  });
-}
+            if (token) {
+              setTokenInfo({
+                name: token.name,
+                symbol: token.symbol,
+                image: token.image_url,
+                refLink,
+              });
+            } else {
+              // fallback when no token info returned
+              setTokenInfo({
+                name: "Unknown Solana Token",
+                symbol: address.slice(0, 4) + "..." + address.slice(-4),
+                image: "https://cryptologos.cc/logos/solana-sol-logo.png?v=026",
+                refLink,
+              });
+            }
+          } catch (err) {
+            console.error("Helius fallback error:", err);
+            setTokenInfo({
+              name: "Unknown Solana Token",
+              symbol: address.slice(0, 4) + "..." + address.slice(-4),
+              image: "https://cryptologos.cc/logos/solana-sol-logo.png?v=026",
+              refLink,
+            });
+          }
         } else {
           const supportedChains = ["ethereum", "polygon", "base"];
           const cgPlatform = supportedChains.includes(chain) ? chain : null;
