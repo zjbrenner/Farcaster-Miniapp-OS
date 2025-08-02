@@ -1,10 +1,12 @@
 export async function getServerSideProps(context) {
   const { chain, address } = context.query;
-
   const supportedChains = ["ethereum", "polygon", "base"];
+
   if (!chain || !address) {
     return {
-      notFound: true,
+      props: {
+        error: "Missing chain or address",
+      },
     };
   }
 
@@ -13,7 +15,20 @@ export async function getServerSideProps(context) {
   let image = "https://opensea.io/static/images/logos/opensea.svg";
   let link = `https://opensea.io/token/${chain}/${address}?os_ref=farcaster`;
 
-  if (supportedChains.includes(chain)) {
+  if (chain === "solana") {
+    try {
+      const helius = await fetch(`https://api.helius.xyz/v0/token-metadata?mint=${address}&api-key=bab93813-b857-44e2-8d56-11ef06bd090b`);
+      const result = await helius.json();
+      const token = result?.[0]?.token_info;
+      if (token) {
+        symbol = token.symbol;
+        name = token.name;
+        image = token.image_url;
+      }
+    } catch (e) {
+      console.error("Helius error", e);
+    }
+  } else if (supportedChains.includes(chain)) {
     try {
       const cg = await fetch(`https://api.coingecko.com/api/v3/coins/${chain}/contract/${address}`);
       if (cg.ok) {
@@ -37,30 +52,29 @@ export async function getServerSideProps(context) {
   };
 }
 
-export default function Frame({ symbol, name, image, link }) {
-  return (
-    <html>
-      <head>
-        <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>{symbol} Token</title>
+export default function Frame({ symbol, name, image, link, error }) {
+  if (error) {
+    return (
+      <>
+        <title>Missing Frame Data</title>
         <meta name="fc:frame" content="vNext" />
-        <meta name="fc:frame:image" content={image} />
-        <meta name="fc:frame:button:1" content="View on OpenSea" />
-        <meta name="fc:frame:button:1:action" content="link" />
-        <meta name="fc:frame:button:1:target" content={link} />
-        <meta property="og:title" content={name} />
-        <meta property="og:image" content={image} />
-        <meta property="og:description" content={`View ${symbol} on OpenSea`} />
-      </head>
-      <body>
-        <p>Token frame metadata loaded.</p>
-      </body>
-    </html>
+        <meta name="fc:frame:button:1" content="Invalid" />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <title>{symbol} Token Frame</title>
+      <meta name="fc:frame" content="vNext" />
+      <meta name="fc:frame:image" content={image} />
+      <meta name="fc:frame:button:1" content="View on OpenSea" />
+      <meta name="fc:frame:button:1:action" content="link" />
+      <meta name="fc:frame:button:1:target" content={link} />
+      <meta property="og:title" content={name} />
+      <meta property="og:image" content={image} />
+      <meta property="og:description" content={`Preview of ${symbol}`} />
+    </>
   );
 }
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
